@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+
+  <h1 class="mb-4">Search Results</h1>
+
+  <!-- Search Form -->
+  <form method="get" action="{% url 'knowledgehub:search' %}" class="mb-5">
+    <div class="input-group">
+      <input type="text" name="q" class="form-control" placeholder="Search..." value="{{ query }}">
+      <button class="btn btn-primary" type="submit">Search</button>
+    </div>
+  </form>
+
+  {% if query %}
+    <p class="mb-4">Showing results for: <strong>{{ query }}</strong></p>
+
+    <!-- Articles -->
+    <section class="mb-5">
+      <h2>Articles</h2>
+      <div class="row">
+        {% for article in results_articles %}
+        <div class="col-md-4 mb-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title">{{ article.title }}</h5>
+              <p class="card-text">{{ article.content|truncatechars:100 }}</p>
+              <a href="{% url 'knowledgehub:article_detail' article.id %}" class="btn btn-sm btn-outline-primary">Read More</a>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <p>No articles found.</p>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- Books -->
+    <section class="mb-5">
+      <h2>Books</h2>
+      <div class="row">
+        {% for book in results_books %}
+        <div class="col-md-4 mb-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title">{{ book.title }}</h5>
+              <p class="card-text">by {{ book.author }}</p>
+              <a href="{% url 'knowledgehub:book_detail' book.id %}" class="btn btn-sm btn-outline-primary">View Book</a>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <p>No books found.</p>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- Videos -->
+    <section class="mb-5">
+      <h2>Videos</h2>
+      <div class="row">
+        {% for video in results_videos %}
+        <div class="col-md-4 mb-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title">{{ video.title }}</h5>
+              <p class="card-text">{{ video.description|truncatechars:100 }}</p>
+              <a href="{{ video.url }}" class="btn btn-sm btn-outline-primary" target="_blank">Watch Video</a>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <p>No videos found.</p>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- Case Studies -->
+    <section class="mb-5">
+      <h2>Case Studies</h2>
+      <div class="row">
+        {% for case in results_case_studies %}
+        <div class="col-md-4 mb-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title">{{ case.title }}</h5>
+              <p class="card-text">{{ case.abstract|truncatechars:100 }}</p>
+              <a href="{% url 'knowledgehub:case_study_detail' case.id %}" class="btn btn-sm btn-outline-primary">Read More</a>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <p>No case studies found.</p>
+        {% endfor %}
+      </div>
+    </section>
+
+  {% else %}
+    <p>Enter a search term to see results.</p>
+  {% endif %}
+
+</div>
+{% endblock %}

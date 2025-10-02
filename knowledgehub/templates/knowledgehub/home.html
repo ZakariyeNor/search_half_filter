@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+
+  <!-- Hero Section -->
+  <section class="hero text-center mb-5">
+    <h1 class="display-4">Welcome to KnowledgeHub</h1>
+    <p class="lead">Explore the latest Articles, Books, Videos, and Case Studies.</p>
+  </section>
+
+  <!-- Articles Section -->
+  <section class="recent-articles mb-5">
+    <h2 class="mb-4">Latest Articles</h2>
+    <div class="row">
+      {% for article in articles %}
+      <div class="col-md-4 mb-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">{{ article.title }}</h5>
+            <p class="card-text">{{ article.content|truncatechars:100 }}</p>
+            <a href="{% url 'knowledgehub:article_detail' article.pk %}" class="btn btn-sm btn-outline-primary">Read More</a>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <p>No articles available.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Books Section -->
+  <section class="recent-books mb-5">
+    <h2 class="mb-4">Latest Books</h2>
+    <div class="row">
+      {% for book in books %}
+      <div class="col-md-4 mb-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">{{ book.title }}</h5>
+            <p class="card-text">by {{ book.author }}</p>
+            <a href="{% url 'knowledgehub:book_detail' book.pk %}" class="btn btn-sm btn-outline-primary">View Book</a>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <p>No books available.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Videos Section -->
+  <section class="recent-videos mb-5">
+    <h2 class="mb-4">Latest Videos</h2>
+    <div class="row">
+      {% for video in videos %}
+      <div class="col-md-4 mb-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">{{ video.title }}</h5>
+            <p class="card-text">{{ video.description|truncatechars:100 }}</p>
+            <a href="{{ video.url }}" class="btn btn-sm btn-outline-primary" target="_blank">Watch Video</a>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <p>No videos available.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Case Studies Section -->
+  <section class="recent-case-studies mb-5">
+    <h2 class="mb-4">Latest Case Studies</h2>
+    <div class="row">
+      {% for case_study in case_studies %}
+      <div class="col-md-4 mb-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">{{ case_study.title }}</h5>
+            <p class="card-text">{{ case_study.abstract|truncatechars:100 }}</p>
+            <a href="{% url 'knowledgehub:case_study_detail' case_study.pk %}" class="btn btn-sm btn-outline-primary">Read More</a>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <p>No case studies available.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+</div>
+{% endblock %}

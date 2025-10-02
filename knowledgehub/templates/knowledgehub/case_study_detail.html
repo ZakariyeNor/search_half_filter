@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+  <h1>{{ case_study.title }}</h1>
+  {% if case_study.published_at %}
+  <p class="text-muted">Published on: {{ case_study.published_at }}</p>
+  {% endif %}
+  <hr>
+  <p>{{ case_study.abstract }}</p>
+
+  {% if case_study.categories.exists %}
+  <p>
+    Categories: 
+    {% for category in case_study.categories.all %}
+      <span class="badge bg-primary">{{ category.name }}</span>
+    {% endfor %}
+  </p>
+  {% endif %}
+
+  {% if case_study.tags.exists %}
+  <p>
+    Tags:
+    {% for tag in case_study.tags.all %}
+      <span class="badge bg-secondary">{{ tag.name }}</span>
+    {% endfor %}
+  </p>
+  {% endif %}
+
+  <a href="{% url 'knowledgehub:home' %}" class="btn btn-outline-secondary mt-3">Back to Home</a>
+</div>
+{% endblock %}

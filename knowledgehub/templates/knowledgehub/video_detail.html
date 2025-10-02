@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+  <h1>{{ video.title }}</h1>
+  <hr>
+  <p>{{ video.description }}</p>
+  <div class="mb-3">
+    <a href="{{ video.url }}" target="_blank" class="btn btn-primary">Watch Video</a>
+  </div>
+
+  {% if video.categories.exists %}
+  <p>
+    Categories: 
+    {% for category in video.categories.all %}
+      <span class="badge bg-primary">{{ category.name }}</span>
+    {% endfor %}
+  </p>
+  {% endif %}
+
+  {% if video.tags.exists %}
+  <p>
+    Tags:
+    {% for tag in video.tags.all %}
+      <span class="badge bg-secondary">{{ tag.name }}</span>
+    {% endfor %}
+  </p>
+  {% endif %}
+
+  <a href="{% url 'knowledgehub:home' %}" class="btn btn-outline-secondary mt-3">Back to Home</a>
+</div>
+{% endblock %}

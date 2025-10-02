@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+  <h1>{{ article.title }}</h1>
+  {% if article.author %}
+  <p class="text-muted">By {{ article.author }}</p>
+  {% endif %}
+  <hr>
+  <p>{{ article.content }}</p>
+
+  {% if article.categories.exists %}
+  <p>
+    Categories: 
+    {% for category in article.categories.all %}
+      <span class="badge bg-primary">{{ category.name }}</span>
+    {% endfor %}
+  </p>
+  {% endif %}
+
+  {% if article.tags.exists %}
+  <p>
+    Tags:
+    {% for tag in article.tags.all %}
+      <span class="badge bg-secondary">{{ tag.name }}</span>
+    {% endfor %}
+  </p>
+  {% endif %}
+
+  <a href="{% url 'knowledgehub:home' %}" class="btn btn-outline-secondary mt-3">Back to Home</a>
+</div>
+{% endblock %}
