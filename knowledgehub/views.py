@@ -5,6 +5,8 @@ from .models import Article, Book, Video, CaseStudy, Category, Tag
 
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 
+from django.contrib.postgres.search import TrigramSimilarity
+
 # -----------------------------
 # Home / Dashboard View
 # -----------------------------
@@ -87,7 +89,7 @@ def case_study_detail(request, pk):
 # Search View (All Resources) 
 # with Full-Text Search
 # -----------------------------
-def search(request):
+""" def search(request):
     query = request.GET.get('q', '')
     results_articles = Article.objects.none()
     results_books = Book.objects.none()
@@ -132,7 +134,124 @@ def search(request):
         'results_videos': results_videos,
         'results_case_studies': results_case_studies,
     }
-    return render(request, 'knowledgehub/search.html', context)
+    return render(request, 'knowledgehub/search.html', context) """
 
+# -----------------------------
+# Search View (All Resources) 
+# using TrigramSimilarity
+# -----------------------------      
+""" def search(request):
+    query = request.GET.get('q', '')
+    results_articles = Article.objects.none()
+    results_books = Book.objects.none()
+    results_videos = Video.objects.none()
+    results_case_studies = CaseStudy.objects.none()
+
+    if query:
+        search_query = SearchQuery(query)
         
-    
+        # Articles
+        results_articles = Article.objects.annotate(
+            similarity=TrigramSimilarity("title", query) + 
+                       TrigramSimilarity("content", query)
+        ).filter(similarity__gt=0.2).order_by("-similarity")
+        
+        # Books
+        results_books = Book.objects.annotate(
+            similarity=TrigramSimilarity("title", query) + 
+                        TrigramSimilarity("description", query) + 
+                        TrigramSimilarity("author", query)
+        ).filter(similarity__gt=0.2).order_by("-similarity")
+        
+        # Videos
+        results_videos = Video.objects.annotate(
+            similarity=TrigramSimilarity("title", query) + 
+                       TrigramSimilarity("description", query)
+        ).filter(similarity__gt=0.2).order_by("-similarity")
+        
+        # Case Studies
+        results_case_studies = CaseStudy.objects.annotate(
+            similarity=TrigramSimilarity("title", query) + 
+                       TrigramSimilarity("abstract", query)
+        ).filter(similarity__gt=0.2).order_by("-similarity")
+
+    context = {
+        'query': query,
+        'results_articles': results_articles,
+        'results_books': results_books,
+        'results_videos': results_videos,
+        'results_case_studies': results_case_studies,
+    }
+    return render(request, 'knowledgehub/search.html', context) """
+
+
+# -----------------------------
+# Mix Full-text + Fuzzy Search
+# Best practice:
+#       Use SearchVector for fast, exact 
+#       keyword matches. Fall back to 
+#       TrigramSimilarity for typo tolerance.
+# --------------------------------------------
+def search(request):
+    query = request.GET.get('q', '')
+    results_articles = Article.objects.none()
+    results_books = Book.objects.none()
+    results_videos = Video.objects.none()
+    results_case_studies = CaseStudy.objects.none()
+
+    if query:
+        search_query = SearchQuery(query)
+        
+        # Articles
+        results_articles = Article.objects.annotate(
+            rank=SearchRank(SearchVector("title", "content"), search_query)
+        ).filter(rank__gt=0.1).order_by("-rank")
+        
+        if not results_articles.exists():
+            results_articles = Article.objects.annotate(
+                similarity=TrigramSimilarity("title", query) + 
+                           TrigramSimilarity("content", query)
+            ).filter(similarity__gt=0.2).order_by("-similarity")
+        
+        # Books
+        results_books = Book.objects.annotate(
+            rank=SearchRank(SearchVector("title", "description", "author"), search_query)
+        ).filter(rank__gt=0.1).order_by("-rank")
+        
+        if not results_books.exists():
+            results_books = Book.objects.annotate(
+                similarity=TrigramSimilarity("title", query) + 
+                           TrigramSimilarity("description", query) + 
+                           TrigramSimilarity("author", query)
+            ).filter(similarity__gt=0.2).order_by("-similarity")
+        
+        # Videos
+        results_videos = Video.objects.annotate(
+            rank=SearchRank(SearchVector("title", "description"), search_query)
+        ).filter(rank__gt=0.1).order_by("-rank")
+        
+        if not results_videos.exists():
+            results_videos = Video.objects.annotate(
+                similarity=TrigramSimilarity("title", query) + 
+                           TrigramSimilarity("description", query)
+            ).filter(similarity__gt=0.2).order_by("-similarity")
+        
+        # Case Studies
+        results_case_studies = CaseStudy.objects.annotate(
+            rank=SearchRank(SearchVector("title", "abstract"), search_query)
+        ).filter(rank__gt=0.1).order_by("-rank")
+        
+        if not results_case_studies.exists():
+            results_case_studies = CaseStudy.objects.annotate(
+                similarity=TrigramSimilarity("title", query) + 
+                           TrigramSimilarity("abstract", query)
+            ).filter(similarity__gt=0.2).order_by("-similarity")
+
+    context = {
+        'query': query,
+        'results_articles': results_articles,
+        'results_books': results_books,
+        'results_videos': results_videos,
+        'results_case_studies': results_case_studies,
+    }
+    return render(request, 'knowledgehub/search.html', context)
