@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "dal",                        # Django Autocomplete Light core
     "dal_select2",                # Optional, nice Select2 autocomplete widgets
     "django_elasticsearch_dsl",
+    'widget_tweaks',
 ]
 
 ELASTICSEARCH_DSL = {

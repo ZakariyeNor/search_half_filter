@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .autocomplete import ArticleAutocomplete
 
 app_name = "knowledgehub"
 
@@ -21,4 +22,7 @@ urlpatterns = [
 
     # Search view
     path('search/', views.search, name='search'),
+    
+    # Autocomplete
+    path('autocomplete/articles/', ArticleAutocomplete.as_view(), name='article-autocomplete'),
 ]

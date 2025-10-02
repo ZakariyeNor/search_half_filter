@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.text import slugify
 
-from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.indexes import GinIndex, BTreeIndex
 from django.contrib.postgres.search import SearchVectorField
 
 # Category model (e.g. Programming, AI, Law, History)
@@ -47,7 +47,12 @@ class Article(models.Model):
     search_vector = SearchVectorField(null=True)
 
     class Meta:
-        indexes = [GinIndex(fields=['search_vector'])]
+        indexes = [
+            GinIndex(fields=['search_vector'], name="article_search_vector_idx"),
+            GinIndex(name="article_title_content_trgm_idx",
+                     opclasses=["gin_trgm_ops", "gin_trgm_ops"],
+                     fields=["title", "content"]),
+        ]
                
     def __str__(self):
         return self.title
@@ -66,7 +71,14 @@ class Book(models.Model):
     search_vector = SearchVectorField(null=True)
 
     class Meta:
-        indexes = [GinIndex(fields=['search_vector'])]
+        indexes = [
+            GinIndex(fields=['search_vector'], name="book_sv_idx"),
+            GinIndex(
+                fields=['title', 'author', 'description'],
+                opclasses=["gin_trgm_ops", "gin_trgm_ops", "gin_trgm_ops"],
+                name="book_trgm_idx"
+            )
+        ]
         
     def __str__(self):
         return f"{self.title} by {self.author}"
@@ -84,7 +96,10 @@ class Video(models.Model):
     search_vector = SearchVectorField(null=True)
 
     class Meta:
-        indexes = [GinIndex(fields=['search_vector'])] 
+        indexes = [
+           GinIndex(fields=['search_vector'], name="vid_sv_idx"),
+            GinIndex(fields=['title', 'description'], opclasses=["gin_trgm_ops", "gin_trgm_ops"], name="vid_trgm_idx"),
+        ]
          
     def __str__(self):
         return self.title
@@ -101,7 +116,10 @@ class CaseStudy(models.Model):
     search_vector = SearchVectorField(null=True)
 
     class Meta:
-        indexes = [GinIndex(fields=['search_vector'])]
+        indexes = [
+            GinIndex(fields=['search_vector'], name="cs_sv_idx"),
+            GinIndex(fields=['title', 'abstract'], opclasses=["gin_trgm_ops", "gin_trgm_ops"], name="cs_trgm_idx"),
+        ]
         
     def __str__(self):
         return self.title

@@ -7,6 +7,11 @@ from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 
 from django.contrib.postgres.search import TrigramSimilarity
 
+from .filters import ArticleFilter, BookFilter, VideoFilter, CaseStudyFilter
+
+from .utils import highlight_text
+
+
 # -----------------------------
 # Home / Dashboard View
 # -----------------------------
@@ -246,6 +251,17 @@ def search(request):
                 similarity=TrigramSimilarity("title", query) + 
                            TrigramSimilarity("abstract", query)
             ).filter(similarity__gt=0.2).order_by("-similarity")
+            
+        # Highlight text
+        for article in results_articles:
+            article.highlighted_content = highlight_text(article.content, query)
+        for book in results_books:
+            book.highlighted_description = highlight_text(book.description, query)
+        for video in results_videos:
+            video.highlighted_description = highlight_text(video.description, query)
+        for case in results_case_studies:
+            case.highlighted_abstract = highlight_text(case.abstract, query)
+
 
     context = {
         'query': query,
@@ -255,3 +271,72 @@ def search(request):
         'results_case_studies': results_case_studies,
     }
     return render(request, 'knowledgehub/search.html', context)
+
+
+# -----------------------------
+# Filter Faceted
+# using django filter as backend
+# and front end UX
+# -----------------------------
+
+""" def search_and_filter(request):
+    query = request.GET.get('q', '')
+
+    # ------------------------
+    # Base QuerySets
+    # ------------------------
+    articles_qs = Article.objects.all()
+    books_qs = Book.objects.all()
+    videos_qs = Video.objects.all()
+    case_studies_qs = CaseStudy.objects.all()
+
+    # ------------------------
+    # Apply full-text search if query exists
+    # ------------------------
+    if query:
+        search_query = SearchQuery(query)
+
+        articles_qs = articles_qs.annotate(
+            rank=SearchRank(SearchVector("title", "content"), search_query)
+        ).filter(rank__gt=0.1).order_by("-rank")
+
+        books_qs = books_qs.annotate(
+            rank=SearchRank(SearchVector("title", "description", "author"), search_query)
+        ).filter(rank__gt=0.1).order_by("-rank")
+
+        videos_qs = videos_qs.annotate(
+            rank=SearchRank(SearchVector("title", "description"), search_query)
+        ).filter(rank__gt=0.1).order_by("-rank")
+
+        case_studies_qs = case_studies_qs.annotate(
+            rank=SearchRank(SearchVector("title", "abstract"), search_query)
+        ).filter(rank__gt=0.1).order_by("-rank")
+
+    # ------------------------
+    # Apply django-filter filters
+    # ------------------------
+    
+    article_filter = ArticleFilter(request.GET, queryset=articles_qs)
+    book_filter = BookFilter(request.GET, queryset=books_qs)
+    video_filter = VideoFilter(request.GET, queryset=videos_qs)
+    case_filter = CaseStudyFilter(request.GET, queryset=case_studies_qs)
+
+
+    # ------------------------
+    # Context for template
+    # ------------------------
+    context = {
+        "query": query,
+        "results_articles": article_filter.qs,
+        "results_books": book_filter.qs,
+        "results_videos": video_filter.qs,
+        "results_case_studies": case_filter.qs,
+        "article_filter": article_filter,
+        "book_filter": book_filter,
+        "video_filter": video_filter,
+        "case_filter": case_filter,
+    }
+
+    return render(request, "knowledgehub/search.html", context) """
+
+
