@@ -1,6 +1,9 @@
 from django.db import models
 from django.utils.text import slugify
 
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVectorField
+
 # Category model (e.g. Programming, AI, Law, History)
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -41,6 +44,11 @@ class Article(models.Model):
     categories = models.ManyToManyField(Category, related_name="articles")
     tags = models.ManyToManyField(Tag, related_name="articles", blank=True)
 
+    search_vector = SearchVectorField(null=True)
+
+    class Meta:
+        indexes = [GinIndex(fields=['search_vector'])]
+               
     def __str__(self):
         return self.title
 
@@ -54,7 +62,12 @@ class Book(models.Model):
     description = models.TextField(blank=True)
     categories = models.ManyToManyField(Category, related_name="books")
     tags = models.ManyToManyField(Tag, related_name="books", blank=True)
+    
+    search_vector = SearchVectorField(null=True)
 
+    class Meta:
+        indexes = [GinIndex(fields=['search_vector'])]
+        
     def __str__(self):
         return f"{self.title} by {self.author}"
 
@@ -68,6 +81,11 @@ class Video(models.Model):
     categories = models.ManyToManyField(Category, related_name="videos")
     tags = models.ManyToManyField(Tag, related_name="videos", blank=True)
 
+    search_vector = SearchVectorField(null=True)
+
+    class Meta:
+        indexes = [GinIndex(fields=['search_vector'])] 
+         
     def __str__(self):
         return self.title
     
@@ -79,6 +97,11 @@ class CaseStudy(models.Model):
     published_at = models.DateField(blank=True, null=True)
     categories = models.ManyToManyField(Category, related_name="case_studies")
     tags = models.ManyToManyField(Tag, related_name="case_studies", blank=True)
+    
+    search_vector = SearchVectorField(null=True)
 
+    class Meta:
+        indexes = [GinIndex(fields=['search_vector'])]
+        
     def __str__(self):
         return self.title

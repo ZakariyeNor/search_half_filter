@@ -3,6 +3,8 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from .models import Article, Book, Video, CaseStudy, Category, Tag
 
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
+
 # -----------------------------
 # Home / Dashboard View
 # -----------------------------
@@ -47,8 +49,9 @@ def case_study_detail(request, pk):
 
 # -----------------------------
 # Search View (All Resources)
+# search() view uses icontains
 # -----------------------------
-def search(request):
+""" def search(request):
     query = request.GET.get('q', '')
     results_articles = Article.objects.none()
     results_books = Book.objects.none()
@@ -77,8 +80,59 @@ def search(request):
         'results_videos': results_videos,
         'results_case_studies': results_case_studies,
     }
-    return render(request, 'knowledgehub/search.html', context)
+    return render(request, 'knowledgehub/search.html', context) """
 
+
+# -----------------------------
+# Search View (All Resources) 
+# with Full-Text Search
+# -----------------------------
+def search(request):
+    query = request.GET.get('q', '')
+    results_articles = Article.objects.none()
+    results_books = Book.objects.none()
+    results_videos = Video.objects.none()
+    results_case_studies = CaseStudy.objects.none()
+
+    if query:
+        search_query = SearchQuery(query)
+        
+        # Articles
+        results_articles = Article.objects.annotate(
+            search=SearchVector("title", "content")
+        ).filter(search=search_query).annotate(
+            rank=SearchRank(SearchVector("title", "content"), search_query)
+            ).order_by("-rank")
+        
+        # Books
+        results_books = Book.objects.annotate(
+            search=SearchVector("title", "description", "author")
+        ).filter(search=search_query).annotate(
+            rank=SearchRank(SearchVector("title", "description", "author"), search_query)
+        ).order_by("-rank")
+        
+        # Videos
+        results_videos = Video.objects.annotate(
+            search=SearchVector("title", "description")
+        ).filter(search=search_query).annotate(
+            rank=SearchRank(SearchVector("title", "description"), search_query)
+        ).order_by("-rank")
+        
+        # Case Studies
+        results_case_studies = CaseStudy.objects.annotate(
+            search=SearchVector("title", "abstract")
+        ).filter(search=search_query).annotate(
+            rank=SearchRank(SearchVector("title", "abstract"), search_query)
+        ).order_by("-rank")
+
+    context = {
+        'query': query,
+        'results_articles': results_articles,
+        'results_books': results_books,
+        'results_videos': results_videos,
+        'results_case_studies': results_case_studies,
+    }
+    return render(request, 'knowledgehub/search.html', context)
 
         
     
