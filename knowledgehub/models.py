@@ -50,7 +50,7 @@ class Book(models.Model):
     title = models.CharField(max_length=255)
     author = models.CharField(max_length=100)
     published_date = models.DateField(blank=True, null=True)
-    isbn = models.CharField(max_length=13, blank=True, null=True)
+    isbn = models.CharField(max_length=20, blank=True, null=True)
     description = models.TextField(blank=True)
     categories = models.ManyToManyField(Category, related_name="books")
     tags = models.ManyToManyField(Tag, related_name="books", blank=True)
