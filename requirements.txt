@@ -1,5 +1,6 @@
 asgiref==3.9.2
 certifi==2025.8.3
+dj-database-url==3.0.1
 Django==5.2.7
 django-autocomplete-light==3.12.1
 django-elasticsearch-dsl==9.0
