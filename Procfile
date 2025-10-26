@@ -1,1 +1,1 @@
-web: gunicorn search.wsgi:application
+web: gunicorn search.asgi:application
